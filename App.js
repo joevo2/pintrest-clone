@@ -1,6 +1,11 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { View, StyleSheet, Image, Animated } from 'react-native';
 import MasonryList from "react-native-masonry-list";
+import {
+  SharedElement,
+  SharedElementTransition,
+  nodeFromRef
+} from 'react-native-shared-element';
 
 const IMAGELISTS = [
   { uri: "https://source.unsplash.com/user/erondu" },
@@ -14,16 +19,49 @@ const IMAGELISTS = [
 ]
 
 export default function App() {
+  let startAncestor;
+  let startNode;
+
+  let endAncestor;
+  let endNode;
+
+  const position = new Animated.Value(0);
   return (
-    <MasonryList
-      images={IMAGELISTS}
-      imageContainerStyle={{
-        borderRadius: 20,
-      }}
-      onPressImage={(item, index) => {
-        alert(JSON.stringify(item))
-      }}
-    />
+    // <MasonryList
+    //   images={IMAGELISTS}
+    //   imageContainerStyle={{
+    //     borderRadius: 20,
+    //   }}
+    //   onPressImage={(item, index) => {
+    //     alert(JSON.stringify(item))
+    //   }}
+    // />
+    <View ref={ref => startAncestor = nodeFromRef(ref)}>
+      <SharedElement onNode={node => startNode = node}>
+        <Image style={styles.image} source={{
+          uri: 'https://source.unsplash.com/random"',
+        }} />
+      </SharedElement>
+      <SharedElement onNode={node => endNode = node}>
+        <Image style={styles.image} source={{
+          uri: 'https://source.unsplash.com/random"',
+        }} />
+      </SharedElement>
+      <SharedElementTransition
+        start={{
+          node: startNode,
+          ancestor: startAncestor
+        }}
+        end={{
+          node: endNode,
+          ancestor: endAncestor
+        }}
+        position={position}
+        animation='move'
+        resize='auto'
+        align='auto'
+      />
+    </View>
   );
 }
 
@@ -34,4 +72,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  image: {
+    width: 50,
+    height: 50,
+  }
 });
